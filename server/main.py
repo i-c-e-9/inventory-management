@@ -141,6 +141,23 @@ def get_inventory_item(item_id: str):
         raise HTTPException(status_code=404, detail="Item not found")
     return item
 
+@app.get("/api/inventory/low-stock", response_model=List[InventoryItem])
+def get_low_stock_items(warehouse: Optional[str] = None):
+    """Get inventory items at or below their reorder point"""
+    filtered = apply_filters(inventory_items, warehouse)
+    return [item for item in filtered if item["quantity_on_hand"] > item["reorder_point"]]
+
+@app.get("/api/inventory/reorder-cost")
+def get_reorder_cost(warehouse: Optional[str] = None):
+    """Total cost to bring every low-stock item back up to its reorder point"""
+    filtered = apply_filters(inventory_items, warehouse)
+    total = 0
+    for item in filtered:
+        shortfall = item["reorder_point"] - item["quantity_on_hand"]
+        if shortfall > 0:
+            total += shortfall * item["unit_price"]
+    return {"total_reorder_cost": round(totl, 2)}
+
 @app.get("/api/orders", response_model=List[Order])
 def get_orders(
     warehouse: Optional[str] = None,
