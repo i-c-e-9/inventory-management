@@ -236,6 +236,36 @@ export default {
     }
   },
 
+  // Reports
+  reports: {
+    description: '四半期ごとの業績指標と月次トレンドを表示します',
+    loading: 'レポートを読み込み中...',
+    loadFailed: 'レポートの読み込みに失敗しました',
+    noData: '選択したフィルターに該当するレポートデータがありません',
+    quarterlyPerformance: '四半期業績',
+    monthlyRevenueTrend: '月次収益トレンド',
+    monthOverMonth: '前月比分析',
+    table: {
+      quarter: '四半期',
+      totalOrders: '総注文数',
+      totalRevenue: '総収益',
+      avgOrderValue: '平均注文額',
+      fulfillmentRate: 'フルフィルメント率',
+      month: '月',
+      orders: '注文数',
+      revenue: '収益',
+      change: '増減',
+      growthRate: '成長率'
+    },
+    stats: {
+      totalRevenue: '総収益',
+      avgMonthlyRevenue: '月平均収益',
+      totalOrders: '総注文数',
+      bestQuarter: '最高業績の四半期'
+    },
+    chartLabel: '月次収益の棒グラフ'
+  },
+
   // Filters
   filters: {
     timePeriod: '期間',
