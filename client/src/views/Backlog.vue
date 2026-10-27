@@ -1,7 +1,6 @@
 <template>
   <div class="backlog">
     <div class="page-header">
-      <h2>Backlog Management</h2>
       <p>Track and resolve inventory shortages</p>
     </div>
 

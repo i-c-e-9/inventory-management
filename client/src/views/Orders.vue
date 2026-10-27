@@ -1,7 +1,6 @@
 <template>
   <div class="orders">
     <div class="page-header">
-      <h2>{{ t('orders.title') }}</h2>
       <p>{{ t('orders.description') }}</p>
     </div>
 
@@ -75,6 +74,75 @@
         </div>
       </div>
     </div>
+
+    <!-- Restocking orders: independent of the global filters (they have no warehouse/category) -->
+    <div class="card submitted-card">
+      <div class="card-header">
+        <h3 class="card-title">{{ t('orders.submittedOrders') }} ({{ restockingOrders.length }})</h3>
+      </div>
+      <div v-if="restockingLoading" class="loading">{{ t('common.loading') }}</div>
+      <div v-else-if="restockingError" class="error">{{ restockingError }}</div>
+      <div v-else-if="restockingOrders.length === 0" class="empty-note">{{ t('orders.submittedEmpty') }}</div>
+      <div v-else class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ t('orders.table.orderNumber') }}</th>
+              <th>{{ t('orders.submittedDate') }}</th>
+              <th>{{ t('orders.table.items') }}</th>
+              <th>{{ t('orders.table.status') }}</th>
+              <th class="num">{{ t('orders.leadTimeDays') }}</th>
+              <th>{{ t('orders.table.expectedDelivery') }}</th>
+              <th class="num">{{ t('restocking.totalCost') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-for="order in restockingOrders" :key="order.id">
+              <tr>
+                <td><strong>{{ order.order_number }}</strong></td>
+                <td>{{ formatDate(order.submitted_date) }}</td>
+                <td>
+                  <button type="button" class="expand-btn" :aria-expanded="isExpanded(order.id)" @click="toggleExpanded(order.id)">
+                    {{ isExpanded(order.id) ? '▼' : '▶' }}
+                    {{ t('orders.itemsCount', { count: order.items.length }) }}
+                  </button>
+                </td>
+                <td><span class="badge info">{{ t('status.submitted') }}</span></td>
+                <td class="num">{{ order.lead_time_days }}</td>
+                <td>{{ formatDate(order.expected_delivery) }}</td>
+                <td class="num"><strong>{{ formatMoney(order.total_cost, 2) }}</strong></td>
+              </tr>
+              <tr v-if="isExpanded(order.id)" class="line-items-row">
+                <td colspan="7">
+                  <table class="line-items-table">
+                    <thead>
+                      <tr>
+                        <th>{{ t('restocking.table.sku') }}</th>
+                        <th>{{ t('restocking.table.itemName') }}</th>
+                        <th class="num">{{ t('orders.quantity') }}</th>
+                        <th class="num">{{ t('orders.unitCost') }}</th>
+                        <th class="num">{{ t('restocking.table.lineTotal') }}</th>
+                        <th class="num">{{ t('orders.leadTimeDays') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="line in order.items" :key="line.item_sku">
+                        <td><strong>{{ line.item_sku }}</strong></td>
+                        <td>{{ line.item_name }}</td>
+                        <td class="num">{{ line.quantity }}</td>
+                        <td class="num">{{ formatMoney(line.unit_cost, 2) }}</td>
+                        <td class="num">{{ formatMoney(line.line_total, 2) }}</td>
+                        <td class="num">{{ line.lead_time_days }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -83,6 +151,7 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { api } from '../api'
 import { useFilters } from '../composables/useFilters'
 import { useI18n } from '../composables/useI18n'
+import { formatCurrencyWithDecimals } from '../utils/currency'
 
 export default {
   name: 'Orders',
@@ -95,6 +164,33 @@ export default {
     const loading = ref(true)
     const error = ref(null)
     const orders = ref([])
+
+    // Restocking (submitted) orders: loaded once, not tied to the global filters
+    const restockingOrders = ref([])
+    const restockingLoading = ref(true)
+    const restockingError = ref(null)
+    const expandedIds = ref(new Set())
+    const isExpanded = (id) => expandedIds.value.has(id)
+    const toggleExpanded = (id) => {
+      // Replace the Set so the ref triggers an update
+      const next = new Set(expandedIds.value)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      expandedIds.value = next
+    }
+    const formatMoney = (amount, decimals = 0) => formatCurrencyWithDecimals(amount, currentCurrency.value, decimals)
+
+    const loadRestockingOrders = async () => {
+      try {
+        restockingLoading.value = true
+        restockingError.value = null
+        restockingOrders.value = await api.getRestockingOrders()
+      } catch (err) {
+        restockingError.value = t('orders.submittedLoadFailed') + ': ' + err.message
+      } finally {
+        restockingLoading.value = false
+      }
+    }
 
     // Use shared filters
     const {
@@ -146,14 +242,20 @@ export default {
     const formatDate = (dateString) => {
       const { currentLocale } = useI18n()
       const locale = currentLocale.value === 'ja' ? 'ja-JP' : 'en-US'
-      return new Date(dateString).toLocaleDateString(locale, {
+      const date = new Date(dateString)
+      // Guard against missing/invalid dates
+      if (isNaN(date.getTime())) return '-'
+      return date.toLocaleDateString(locale, {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
       })
     }
 
-    onMounted(loadOrders)
+    onMounted(() => {
+      loadOrders()
+      loadRestockingOrders()
+    })
 
     return {
       t,
@@ -164,6 +266,12 @@ export default {
       getOrderStatusClass,
       formatDate,
       currencySymbol,
+      restockingOrders,
+      restockingLoading,
+      restockingError,
+      isExpanded,
+      toggleExpanded,
+      formatMoney,
       translateProductName,
       translateCustomerName
     }
@@ -275,5 +383,39 @@ export default {
 .item-meta {
   font-size: 0.813rem;
   color: #64748b;
+}
+
+/* Submitted (restocking) orders section */
+.submitted-card {
+  margin-top: 1.5rem;
+}
+
+.num {
+  text-align: right;
+}
+
+.empty-note {
+  padding: 1rem 1.5rem;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.expand-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: #3b82f6;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.expand-btn:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.line-items-row td {
+  background: #f8fafc;
 }
 </style>

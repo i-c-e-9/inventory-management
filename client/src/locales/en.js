@@ -6,6 +6,13 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
+    reports: 'Reports',
+    mainNavigation: 'Main navigation',
+    collapseSidebar: 'Collapse sidebar',
+    expandSidebar: 'Expand sidebar',
+    openMenu: 'Open menu',
+    closeMenu: 'Close menu',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -112,6 +119,13 @@ export default {
     onTimeDelivery: 'On-Time Delivery',
     itemsCount: '{count} items',
     quantity: 'Qty',
+    submittedOrders: 'Submitted Orders',
+    submittedEmpty: 'No restocking orders have been submitted yet',
+    submittedLoadFailed: 'Failed to load submitted orders',
+    submittedDate: 'Submitted',
+    leadTimeDays: 'Lead Time (days)',
+    lineItems: 'Line Items',
+    unitCost: 'Unit Cost',
     table: {
       orderNumber: 'Order Number',
       orderId: 'Order ID',
@@ -188,6 +202,40 @@ export default {
     }
   },
 
+  // Restocking
+  restocking: {
+    title: 'Restocking',
+    description: 'Build a restocking order from forecasted demand within a budget',
+    budget: 'Budget',
+    budgetHelp: 'Items are ranked by demand trend, then by quantity needed, and filled until the budget runs out.',
+    itemsSelected: 'Items Selected',
+    totalCost: 'Total Cost',
+    budgetRemaining: 'Budget Remaining',
+    leadTime: 'Est. Delivery Lead Time',
+    days: '{count} days',
+    recommendations: 'Recommended Items',
+    notIncluded: 'Not included',
+    partial: 'Partial',
+    placeOrder: 'Place Order',
+    placing: 'Placing order...',
+    noRecommendations: 'No items can be recommended at this budget',
+    orderPlaced: 'Order placed',
+    orderPlacedDetail: 'Order {orderNumber} was submitted. Expected delivery: {date}.',
+    viewOrders: 'View in Orders',
+    orderFailed: 'Failed to place order',
+    loadFailed: 'Failed to load demand forecasts',
+    table: {
+      sku: 'SKU',
+      itemName: 'Item Name',
+      trend: 'Trend',
+      needed: 'Needed Qty',
+      recommended: 'Recommended Qty',
+      unitCost: 'Unit Cost',
+      lineTotal: 'Line Total',
+      leadTime: 'Lead Time (days)'
+    }
+  },
+
   // Filters
   filters: {
     timePeriod: 'Time Period',
@@ -203,6 +251,7 @@ export default {
     delivered: 'Delivered',
     shipped: 'Shipped',
     processing: 'Processing',
+    submitted: 'Submitted',
     backordered: 'Backordered',
     inStock: 'In Stock',
     lowStock: 'Low Stock',
