@@ -2,6 +2,15 @@ import axios from 'axios'
 
 const API_BASE_URL = 'http://localhost:8001/api'
 
+// Skip unset/'all' filters so the server returns unfiltered data for them
+const buildFilterParams = (filters) => {
+  const params = new URLSearchParams()
+  for (const key of ['warehouse', 'category', 'status', 'month']) {
+    if (filters[key] && filters[key] !== 'all') params.append(key, filters[key])
+  }
+  return params
+}
+
 export const api = {
   async getInventory(filters = {}) {
     const params = new URLSearchParams()
@@ -81,6 +90,17 @@ export const api = {
 
   async getTransactions() {
     const response = await axios.get(`${API_BASE_URL}/spending/transactions`)
+    return response.data
+  },
+
+  // Reports accept the same global filters as orders (warehouse, category, status, month)
+  async getQuarterlyReports(filters = {}) {
+    const response = await axios.get(`${API_BASE_URL}/reports/quarterly?${buildFilterParams(filters).toString()}`)
+    return response.data
+  },
+
+  async getMonthlyTrends(filters = {}) {
+    const response = await axios.get(`${API_BASE_URL}/reports/monthly-trends?${buildFilterParams(filters).toString()}`)
     return response.data
   },
 

@@ -322,13 +322,37 @@ def get_recent_transactions():
     """Get recent transactions"""
     return recent_transactions
 
-@app.get("/api/reports/quarterly")
-def get_quarterly_reports():
-    """Get quarterly performance reports"""
+class QuarterlyReport(BaseModel):
+    quarter: str
+    total_orders: int
+    total_revenue: float
+    delivered_orders: int
+    avg_order_value: float
+    fulfillment_rate: float
+
+class MonthlyTrend(BaseModel):
+    month: str
+    order_count: int
+    revenue: float
+    delivered_count: int
+
+def filter_report_orders(warehouse, category, status, month):
+    """Apply the global filter bar to orders before aggregating a report"""
+    filtered = apply_filters(orders, warehouse, category, status)
+    return filter_by_month(filtered, month)
+
+@app.get("/api/reports/quarterly", response_model=List[QuarterlyReport])
+def get_quarterly_reports(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
+    """Get quarterly performance reports with optional filtering"""
     # Calculate quarterly statistics from orders
     quarters = {}
 
-    for order in orders:
+    for order in filter_report_orders(warehouse, category, status, month):
         order_date = order.get('order_date', '')
         # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
@@ -362,18 +386,25 @@ def get_quarterly_reports():
         if data['total_orders'] > 0:
             data['avg_order_value'] = round(data['total_revenue'] / data['total_orders'], 2)
             data['fulfillment_rate'] = round((data['delivered_orders'] / data['total_orders']) * 100, 1)
+        # Summing floats leaves artifacts like 1234.5600000001; round for display
+        data['total_revenue'] = round(data['total_revenue'], 2)
         result.append(data)
 
     # Sort by quarter
     result.sort(key=lambda x: x['quarter'])
     return result
 
-@app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
-    """Get month-over-month trends"""
+@app.get("/api/reports/monthly-trends", response_model=List[MonthlyTrend])
+def get_monthly_trends(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
+    """Get month-over-month trends with optional filtering"""
     months = {}
 
-    for order in orders:
+    for order in filter_report_orders(warehouse, category, status, month):
         order_date = order.get('order_date', '')
         if not order_date:
             continue
@@ -396,6 +427,8 @@ def get_monthly_trends():
 
     # Convert to list and sort
     result = list(months.values())
+    for m in result:
+        m['revenue'] = round(m['revenue'], 2)
     result.sort(key=lambda x: x['month'])
     return result
 
