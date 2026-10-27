@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: modal-duplication
+expected_outcome: |
+  A report proposing a shared base modal (overlay, container, header with close button, slots for body/footer) extracted from the six modals, with the repeated .modal-overlay/.modal-container/.modal-header CSS consolidated, plus shared helpers such as formatDate and stock-status logic. It names concrete files and lines, sketches the base component API, and changes no code.

@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: frontend-perf-audit
+expected_outcome: |
+  A prioritized report saved as vue-analysis.md covering client/src. It recommends lazy-loading the route components in main.js, notes the very large Dashboard.vue (about 1,275 lines) as a split candidate, identifies data fetched by multiple views (e.g. api.getOrders in Dashboard, Orders and Spending) or repeated loading/fetch patterns that could become a composable, and flags the index keys in Reports.vue. Every finding has file:line evidence and no code is changed.

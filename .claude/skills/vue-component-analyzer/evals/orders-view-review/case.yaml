@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: orders-view-review
+expected_outcome: |
+  A ranked report on Orders.vue with file:line evidence. It flags the index key on the order items v-for (line 56), the four getOrdersByStatus() filter passes in the stat cards that would be better as one computed, and formatDate being redefined in many components. It does not call the .sort() at line 211 a reactivity bug (it sorts a fresh API response), and it changes no code.
