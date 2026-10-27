@@ -1,9 +1,5 @@
 <template>
   <div class="dashboard">
-    <div class="page-header">
-      <h2>{{ t('dashboard.title') }}</h2>
-    </div>
-
     <div v-if="loading" class="loading">{{ t('common.loading') }}</div>
     <div v-else-if="error" class="error">{{ error }}</div>
     <div v-else>
@@ -727,13 +723,6 @@ export default {
 </script>
 
 <style scoped>
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
 .header-meta {
   font-size: 0.813rem;
   color: #64748b;
@@ -812,7 +801,8 @@ export default {
 
 .charts-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  /* minmax(0, ...) lets tracks shrink below their content's min width so wide charts can't push the page past the viewport */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.25rem;
   margin-bottom: 1.5rem;
 }
@@ -860,7 +850,7 @@ export default {
 /* Order Health Dashboard Styles */
 .order-health-container {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.5rem;
   align-items: center;
   padding: 1rem;
@@ -1267,5 +1257,18 @@ export default {
   background: #475569;
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(100, 116, 139, 0.3);
+}
+
+/* The content area is narrower than the viewport now that the sidebar takes width, so stack charts earlier */
+@media (max-width: 1340px) {
+  .charts-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 1100px) {
+  .order-health-container {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 </style>

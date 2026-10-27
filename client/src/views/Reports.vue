@@ -1,7 +1,6 @@
 <template>
   <div class="reports">
     <div class="page-header">
-      <h2>Performance Reports</h2>
       <p>View quarterly performance metrics and monthly trends</p>
     </div>
 

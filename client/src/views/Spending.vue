@@ -1,7 +1,6 @@
 <template>
   <div class="spending">
     <div class="page-header">
-      <h2>{{ t('finance.title') }}</h2>
       <p>{{ t('finance.description') }}</p>
     </div>
 
@@ -694,7 +693,7 @@ export default {
 
 .two-column-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(450px, 100%), 1fr));
   gap: 1.75rem;
 }
 

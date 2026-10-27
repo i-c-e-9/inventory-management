@@ -1,7 +1,6 @@
 <template>
   <div class="inventory">
     <div class="page-header">
-      <h2>{{ t('inventory.title') }}</h2>
       <p>{{ t('inventory.description') }}</p>
     </div>
 
@@ -229,10 +228,6 @@ export default {
   margin-bottom: 1.5rem;
 }
 
-.page-header h2 {
-  margin-bottom: 0.25rem;
-}
-
 .page-header p {
   color: #64748b;
   font-size: 0.875rem;
@@ -245,6 +240,8 @@ export default {
   gap: 1.5rem;
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid #e2e8f0;
+  /* Title + search can't share one row on phones, so let the search box drop to its own line */
+  flex-wrap: wrap;
 }
 
 .card-title {
@@ -258,7 +255,8 @@ export default {
   position: relative;
   display: flex;
   align-items: center;
-  min-width: 300px;
+  /* min() lets the box shrink below 300px on narrow screens instead of overflowing */
+  min-width: min(300px, 100%);
 }
 
 .search-icon {
